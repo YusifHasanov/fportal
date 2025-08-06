@@ -12,6 +12,15 @@ class NewsController extends Controller
 {
     public function index(Request $request)
     {
+        
+        $request->validate([
+            'search' => 'nullable|string|max:255',
+            'category' => 'nullable|string|max:100',
+            'sort' => 'nullable|in:latest,popular,commented',
+            'tags' => 'nullable|array',
+            'tags.*' => 'string|max:100',
+        ]);
+        
         $query = News::published()
             ->with(['category', 'user', 'tags']);
 

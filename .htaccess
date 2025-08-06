@@ -1,0 +1,61 @@
+<IfModule mod_rewrite.c>
+    # Sembolik linkleri takip et, dizin listelemeyi kapat
+    Options +FollowSymLinks -Indexes
+    RewriteEngine On
+
+    # RewriteRule ^storage/(.*)$ /public/public/$1 [L]
+
+    # RewriteBase / # Genellikle public_html'de ise gerekmez, alt klasördeyse /altklasoradi şeklinde gerekebilir.
+
+    # --- DOĞRUDAN ERİŞİM İZİNLERİ ---
+    # Resimlerinizin, CSS, JS dosyalarınızın bulunduğu klasörler burada listelenmeli.
+    # Eğer resimleriniz örneğin /images klasöründeyse, aşağıdaki satırlara eklemeniz gerekir:
+    # RewriteCond %{REQUEST_URI} ^/images/ [OR]
+    # ÖNEMLİ: Resimleriniz gerçekten /public/, /assets/ veya /uploads/ altında mı? Kontrol edin!
+    # RewriteCond %{REQUEST_URI} ^/public/ [OR]
+    RewriteCond %{REQUEST_URI} ^/assets/ [OR]
+    RewriteCond %{REQUEST_URI} ^/uploads/
+    RewriteRule ^ - [L] # Bu klasörlere gelen istekleri yeniden yazma, doğrudan sunulsun.
+
+    # --- PUBLIC KLASÖRÜ İÇİN YÖNLENDİRME ---
+    # /dizin/dosya.php gibi istekleri /public/dizin/dosya.php olarak kontrol et
+    RewriteCond %{DOCUMENT_ROOT}/public/$1 -f [OR]
+    RewriteCond %{DOCUMENT_ROOT}/public/$1 -d
+    RewriteRule ^(.*)$ /public/$1 [L]
+
+    # --- FRAMEWORK YÖNLENDİRMELERİ ---
+    # API, Admin vb. bilinen endpoint'leri index.php'ye yönlendir (Optimize edilebilir ama genellikle sorun çıkarmaz)
+    RewriteCond %{REQUEST_URI} ^/api/ [OR]
+    RewriteCond %{REQUEST_URI} ^/admin/ [OR]
+    RewriteCond %{REQUEST_URI} ^/auth/ [OR]
+    RewriteCond %{REQUEST_URI} ^/user/ [OR]
+    RewriteCond %{REQUEST_URI} ^/dashboard/
+    RewriteRule ^(.*)$ /public/index.php [L] # Bunları public içindeki ana yönlendiriciye gönder
+
+    # --- ANA YÖNLENDİRİCİ (FRONT CONTROLLER) ---
+    # Yukarıdaki kurallara uymayan VE fiziksel bir dosya/dizin OLMAYAN tüm istekler
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(.*)$ /public/index.php [L] # Hepsini public içindeki ana yönlendiriciye gönder
+
+    # Ana sayfa isteğini de yönlendir (isteğe bağlı, genellikle yukarıdaki kural yakalar)
+    RewriteRule ^/?$ public/index.php [L]
+    
+    RewriteCond %{REQUEST_METHOD} OPTIONS
+    RewriteRule ^(.*)$ $1 [R=200,L]
+    
+    RewriteCond %{HTTPS} off
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    
+</IfModule>
+
+# Ekstra Güvenlik Başlıkları (Opsiyonel, 403 ile ilgisi yok)
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+    # Header set Content-Security-Policy "default-src 'self';" # Dikkat: CSP ayarları sitenizi bozabilir, dikkatli yapılandırın.
+</IfModule>

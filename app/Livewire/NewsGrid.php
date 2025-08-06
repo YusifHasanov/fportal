@@ -8,7 +8,7 @@ use App\Models\News;
 class NewsGrid extends Component
 {
     public $news = [];
-    public $perPage = 8;
+    public $perPage = 9;
     public $hasMore = true;
 
     public function mount()

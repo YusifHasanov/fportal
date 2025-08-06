@@ -15,11 +15,26 @@ class CorsMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $response = $next($request);
+        // OPTIONS request üçün preflight cavabı
+        if ($request->getMethod() === "OPTIONS") {
+            $response = response('', 200);
+        } else {
+            $response = $next($request);
+        }
 
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+        // Təhlükəsizlik üçün daha məhdud CORS siyasəti
+        $allowedOrigins = [
+            'https://fportal.az',
+            config('app.url')
+        ];
+        
+        $origin = $request->headers->get('Origin');
+        if (in_array($origin, $allowedOrigins)) {
+            $response->headers->set('Access-Control-Allow-Origin', $origin);
+        }
+        
+        $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-CSRF-TOKEN');
         $response->headers->set('Access-Control-Allow-Credentials', 'true');
 
         return $response;

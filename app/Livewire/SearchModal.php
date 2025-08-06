@@ -24,14 +24,23 @@ class SearchModal extends Component
         $this->search = '';
         $this->results = [];
     }
+    
+        protected $rules = [
+        'search' => 'nullable|string|max:255',
+    ];
 
     public function updatedSearch()
     {
+        $this->validateOnly('search');
+        
         if (strlen($this->search) >= 2) {
+            // XSS qorunması üçün əlavə təmizlik
+            $cleanSearch = strip_tags($this->search);
+            
             $this->results = News::published()
-                ->where(function ($query) {
-                    $query->where('title', 'like', '%' . $this->search . '%')
-                          ->orWhere('excerpt', 'like', '%' . $this->search . '%');
+                ->where(function ($query) use ($cleanSearch) {
+                    $query->where('title', 'like', '%' . $cleanSearch . '%')
+                          ->orWhere('excerpt', 'like', '%' . $cleanSearch . '%');
                 })
                 ->with(['category', 'user'])
                 ->latest('published_at')

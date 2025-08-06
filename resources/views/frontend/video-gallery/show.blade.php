@@ -75,7 +75,7 @@ use Illuminate\Support\Facades\Storage;
     @if($videoGallery->description)
     <div class="mb-12">
       <h2 class="text-xl font-semibold mb-2">İzahat</h2>
-      <p class="text-gray-300 leading-relaxed text-base">{!! nl2br(e($videoGallery->description)) !!}</p>
+      <p class="text-gray-300 leading-relaxed text-base">{{ $videoGallery->description }}</p>
     </div>
     @endif
 

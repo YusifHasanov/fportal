@@ -19,6 +19,17 @@ class VideoGallery extends Model
         'sort_order'
     ];
 
+    // XSS qorunması üçün mutator
+    public function setTitleAttribute($value)
+    {
+        $this->attributes['title'] = strip_tags($value);
+    }
+
+    public function setDescriptionAttribute($value)
+    {
+        $this->attributes['description'] = strip_tags($value);
+    }
+
     protected $casts = [
         'is_active' => 'boolean',
         'views' => 'integer',

@@ -26,8 +26,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        'inter': ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        'sans': ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        'gilroy': ['Gilroy', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        'sans': ['Gilroy', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       animation: {
         'marquee': 'marquee 30s linear infinite',

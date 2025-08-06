@@ -31,6 +31,47 @@ class News extends Model implements HasMedia
         'meta_data',
     ];
 
+    // XSS qorunması üçün mutator
+    public function setTitleAttribute($value)
+    {
+        $this->attributes['title'] = strip_tags($value);
+    }
+
+    public function setExcerptAttribute($value)
+    {
+        $this->attributes['excerpt'] = strip_tags($value);
+    }
+
+    // Content'den resim dosya adlarını temizle
+    public function getContentAttribute($value)
+    {
+        if (!$value) {
+            return $value;
+        }
+
+        // Trix attachment caption'larını kaldır
+        $cleanContent = preg_replace(
+            '/<figcaption[^>]*class="[^"]*trix-attachment__caption[^"]*"[^>]*>.*?<\/figcaption>/s',
+            '',
+            $value
+        );
+
+        // Figcaption etiketlerini tamamen kaldır
+        $cleanContent = preg_replace('/<figcaption[^>]*>.*?<\/figcaption>/s', '', $cleanContent);
+
+        // Data-trix-attachment içindeki text node'ları temizle
+        $cleanContent = preg_replace(
+            '/(<figure[^>]*data-trix-attachment[^>]*>.*?<img[^>]*>)([^<]*?)(<\/figure>)/s',
+            '$1$3',
+            $cleanContent
+        );
+
+        // Dosya adı pattern'lerini kaldır (örn: "filename.jpg 123 KB")
+        $cleanContent = preg_replace('/\b\w+\.(jpg|jpeg|png|gif|webp)\s*\d+(\.\d+)?\s*(KB|MB|bytes?)\b/i', '', $cleanContent);
+
+        return $cleanContent;
+    }
+
     protected $casts = [
         'is_featured' => 'boolean',
         'views_count' => 'integer',

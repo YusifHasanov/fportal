@@ -84,7 +84,7 @@
         @endif
 
         <!-- Article Content -->
-        <div class="article-content mb-12">
+        <div class="article-content mb-12" id="article-content">
             {!! $news->content !!}
         </div>
 
@@ -244,6 +244,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 progressBar.style.width = Math.min(100, Math.max(0, progress)) + '%';
             }
         });
+    }
+
+    // Remove image captions/filenames from content
+    const articleContent = document.getElementById('article-content');
+    if (articleContent) {
+        // Remove all figcaption elements
+        const captions = articleContent.querySelectorAll('figcaption');
+        captions.forEach(caption => caption.remove());
+
+        // Remove text nodes that look like filenames
+        const figures = articleContent.querySelectorAll('figure[data-trix-attachment]');
+        figures.forEach(figure => {
+            const textNodes = [];
+            const walker = document.createTreeWalker(
+                figure,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+            
+            let node;
+            while (node = walker.nextNode()) {
+                // Check if text looks like a filename
+                if (node.textContent.match(/\w+\.(jpg|jpeg|png|gif|webp)\s*\d+(\.\d+)?\s*(KB|MB|bytes?)/i)) {
+                    textNodes.push(node);
+                }
+            }
+            
+            textNodes.forEach(textNode => textNode.remove());
+        });
+
+        // Remove any remaining caption-like elements
+        const captionElements = articleContent.querySelectorAll('.trix-attachment__caption, .trix-attachment__metadata, .trix-attachment__progress');
+        captionElements.forEach(el => el.remove());
     }
 });
 </script>
