@@ -1,2 +1,7 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin
+Disallow: /storage/
+Disallow: /vendor/
+
+Sitemap: http://127.0.0.1/sitemap.xml

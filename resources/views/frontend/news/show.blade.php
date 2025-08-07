@@ -1,7 +1,31 @@
-@extends('layouts.app')
+@extends('layouts.seo-optimized-app')
 
-@section('title', $news->title . ' - FPortal')
-@section('description', $news->excerpt ?: Str::limit(strip_tags($news->content), 160))
+@php
+    // SEO verilerini hazırla
+    $seoData = [
+        'title' => $news->title,
+        'description' => $news->seo_description,
+        'keywords' => $news->seo_keywords,
+        'image' => $news->featured_image_url,
+        'url' => $news->canonical_url,
+        'type' => 'article',
+        'published_time' => $news->published_at->toISOString(),
+        'modified_time' => $news->updated_at->toISOString(),
+        'author' => $news->user->name ?? 'FPortal',
+        'section' => $news->category->name
+    ];
+
+    // Structured Data
+    $structuredData = app('App\Services\SeoService')->generateStructuredData('NewsArticle', [
+        'title' => $news->title,
+        'description' => $news->seo_description,
+        'image' => $news->featured_image_url,
+        'published_at' => $news->published_at,
+        'updated_at' => $news->updated_at,
+        'author' => $news->user->name ?? 'FPortal',
+        'url' => $news->canonical_url
+    ]);
+@endphp
 
 @section('content')
 <!-- Reading Progress Bar -->

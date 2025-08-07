@@ -25,6 +25,10 @@ Route::prefix('video-gallery')->name('frontend.video-gallery.')->group(function 
 
 
 
+// SEO Routes
+Route::get('/sitemap.xml', [App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
+Route::get('/robots.txt', [App\Http\Controllers\SitemapController::class, 'robots'])->name('robots');
+
 // Storage route with CORS headers
 Route::get('/storage/{path}', function ($path) {
     $file = storage_path('app/public/' . $path);

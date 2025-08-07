@@ -35,4 +35,23 @@ return [
         ],
     ],
 
+    'google' => [
+        'analytics_id' => env('GOOGLE_ANALYTICS_ID'),
+        'search_console_verification' => env('GOOGLE_SEARCH_CONSOLE_VERIFICATION'),
+        'search_console_token' => env('GOOGLE_SEARCH_CONSOLE_TOKEN'),
+        'indexing_api_key' => env('GOOGLE_INDEXING_API_KEY'),
+        
+        // Service Account Credentials
+        'service_account' => [
+            'type' => env('GOOGLE_SERVICE_ACCOUNT_TYPE'),
+            'project_id' => env('GOOGLE_SERVICE_ACCOUNT_PROJECT_ID'),
+            'private_key_id' => env('GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_ID'),
+            'private_key' => env('GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY'),
+            'client_email' => env('GOOGLE_SERVICE_ACCOUNT_CLIENT_EMAIL'),
+            'client_id' => env('GOOGLE_SERVICE_ACCOUNT_CLIENT_ID'),
+            'auth_uri' => env('GOOGLE_SERVICE_ACCOUNT_AUTH_URI'),
+            'token_uri' => env('GOOGLE_SERVICE_ACCOUNT_TOKEN_URI'),
+        ],
+    ],
+
 ];

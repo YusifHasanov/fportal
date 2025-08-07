@@ -5,28 +5,77 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'FPortal')</title>
-    <meta name="description" content="@yield('description', 'Azərbaycanın ən dəqiq futbol portalı. Yenilənən xəbərlər, canlı nəticələr, statistik göstəricilər və daha çoxdu.')">
-    <meta name="keywords" content="futbol, xəbər, Azərbaycan, idman, transfer, canlı nəticə, statistika, oyun">
-    <meta name="author" content="FPortal">
-    <meta name="robots" content="index, follow">
+    @php
+        $seoData = $seoData ?? [];
+        $defaultSeo = [
+            'title' => 'FPortal',
+            'description' => 'Azərbaycanın ən dəqiq futbol portalı. Yenilənən xəbərlər, canlı nəticələr, statistik göstəricilər və daha çoxdu.',
+            'keywords' => 'futbol, xəbər, Azərbaycan, idman, transfer, canlı nəticə, statistika, oyun',
+            'image' => asset('assets/og-image.jpg'),
+            'url' => url()->current(),
+            'type' => 'website',
+            'locale' => 'az_AZ',
+            'site_name' => 'FPortal'
+        ];
+        $meta = array_merge($defaultSeo, $seoData);
+        
+        // Title optimization
+        $pageTitle = isset($seoData['title']) && $seoData['title'] !== $defaultSeo['title'] 
+            ? $seoData['title'] . ' - ' . $defaultSeo['title']
+            : $meta['title'];
+    @endphp
 
+    <title>{{ $pageTitle }}</title>
+    <meta name="description" content="{{ $meta['description'] }}">
+    <meta name="keywords" content="{{ $meta['keywords'] }}">
+    <meta name="author" content="FPortal">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <link rel="canonical" href="{{ $meta['url'] }}">
+    
     <!-- Google Search Console Verification -->
     @if(config('services.google.search_console_verification'))
         <meta name="google-site-verification" content="{{ config('services.google.search_console_verification') }}" />
     @endif
 
     <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="@yield('title', 'FPortal')">
-    <meta property="og:description" content="@yield('description', 'Azərbaycanın ən dəqiq futbol portalı. Yenilənən xəbərlər, canlı nəticələr, statistik göstəricilər və daha çoxdu.')">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:site_name" content="FPortal">
+    <meta property="og:title" content="{{ $pageTitle }}">
+    <meta property="og:description" content="{{ $meta['description'] }}">
+    <meta property="og:type" content="{{ $meta['type'] }}">
+    <meta property="og:url" content="{{ $meta['url'] }}">
+    <meta property="og:site_name" content="{{ $meta['site_name'] }}">
+    <meta property="og:image" content="{{ $meta['image'] }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="{{ $meta['locale'] }}">
+    @if(isset($meta['published_time']))
+        <meta property="article:published_time" content="{{ $meta['published_time'] }}">
+    @endif
+    @if(isset($meta['modified_time']))
+        <meta property="article:modified_time" content="{{ $meta['modified_time'] }}">
+    @endif
+    @if(isset($meta['author']))
+        <meta property="article:author" content="{{ $meta['author'] }}">
+    @endif
+    @if(isset($meta['section']))
+        <meta property="article:section" content="{{ $meta['section'] }}">
+    @endif
 
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="@yield('title', 'FPortal')">
-    <meta name="twitter:description" content="@yield('description', 'Azərbaycanın ən dəqiq futbol portalı. Yenilənən xəbərlər, canlı nəticələr, statistik göstəricilər və daha çoxdu.')">
+    <meta name="twitter:site" content="@fportalaz">
+    <meta name="twitter:creator" content="@fportalaz">
+    <meta name="twitter:title" content="{{ $pageTitle }}">
+    <meta name="twitter:description" content="{{ $meta['description'] }}">
+    <meta name="twitter:image" content="{{ $meta['image'] }}">
+
+    <!-- Additional SEO Meta Tags -->
+    <meta name="theme-color" content="#1f2937">
+    <meta name="msapplication-TileColor" content="#1f2937">
+    <meta name="application-name" content="FPortal">
+    <meta name="apple-mobile-web-app-title" content="FPortal">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
@@ -40,6 +89,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.cdnfonts.com/css/gilroy-bold" rel="stylesheet">
 
+    <!-- Structured Data -->
+    @if(isset($structuredData))
+        <script type="application/ld+json">
+            {!! json_encode($structuredData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+        </script>
+    @endif
+
+    <!-- Breadcrumb Structured Data -->
+    @if(isset($breadcrumbs))
+        <script type="application/ld+json">
+            {!! json_encode(app('App\Services\SeoService')->generateBreadcrumbs($breadcrumbs), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+        </script>
+    @endif
+
     <!-- Google Analytics 4 -->
     @if(config('services.google.analytics_id'))
         <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google.analytics_id') }}"></script>
@@ -48,12 +111,18 @@
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', '{{ config('services.google.analytics_id') }}', {
-                page_title: '@yield("title", "FPortal")',
-                page_location: '{{ url()->current() }}',
-                content_group1: 'website'
+                page_title: '{{ $pageTitle }}',
+                page_location: '{{ $meta['url'] }}',
+                content_group1: '{{ $meta['type'] ?? 'website' }}',
+                @if(isset($meta['section']))
+                content_group2: '{{ $meta['section'] }}',
+                @endif
             });
         </script>
     @endif
+
+    <!-- Core Web Vitals Monitoring -->
+    {!! app('App\Services\PerformanceService')->generateWebVitalsScript() !!}
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -168,36 +237,36 @@
                 </div>
 
                 <!-- Social Media -->
-                <div>
+               <div>
                     <h4 class="text-lg font-semibold mb-4 text-white">Sosial Media</h4>
                     <p class="text-gray-400 mb-4">Bizi izləyin və son dəqiqə xəbərlərindən xəbərdar olun!</p>
                     <div class="flex space-x-3 sm:space-x-4">
 
 
                         <!-- Instagram -->
-                        <a href="https://www.instagram.com/fportalaz" target="_blank" class="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-600 rounded-lg flex items-center justify-center hover:from-pink-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg">
+                        <a href="https://www.instagram.com/fportalaz" target="_blank" class="w-11 h-11 sm:w-10 sm:h-10 bg-gradient-to-r from-pink-500 to-purple-600 rounded-lg flex items-center justify-center hover:from-pink-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg">
                             <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                             </svg>
                         </a>
 
                         <!-- Twitter/X -->
-                        <!-- <a href="https://x.com/fportalaz" target="_blank" class="w-11 h-11 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105 shadow-lg">
+                        <a href="https://x.com/fportalaz" target="_blank" class="w-11 h-11 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105 shadow-lg">
                             <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
                             </svg>
-                        </a> -->
+                        </a>
 
 
                         <!-- YouTube -->
-                        <!-- <a href="https://youtube.com/@fportalaz" target="_blank" class="w-11 h-11 sm:w-10 sm:h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center hover:from-red-600 hover:to-red-700 transition-all transform hover:scale-105 shadow-lg">
+                        <a href="https://youtube.com/@fportalaz" target="_blank" class="w-11 h-11 sm:w-10 sm:h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center hover:from-red-600 hover:to-red-700 transition-all transform hover:scale-105 shadow-lg">
                             <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                             </svg>
-                        </a> -->
+                        </a>
 
                         <!-- Telegram -->
-                        <a href="https://t.me/fportal" target="_blank" class="w-10 h-10 bg-blue-400   bg-gradient-to-r from-blue-400 to-blue-500 rounded-lg flex items-center justify-center hover:from-blue-500 hover:to-blue-600 transition-all transform hover:scale-105 shadow-lg">
+                        <a href="https://t.me/fportal" target="_blank" class="w-11 h-11 sm:w-10 sm:h-10 bg-gradient-to-r from-sky-400 to-blue-600 rounded-lg flex items-center justify-center hover:from-sky-500 hover:to-blue-700 transition-all transform hover:scale-105 shadow-lg">
                             <svg class="w-5 h-5 text-white" fill="white" viewBox="0 0 24 24">
                                 <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
                             </svg>

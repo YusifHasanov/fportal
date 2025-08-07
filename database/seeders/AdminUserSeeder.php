@@ -18,13 +18,15 @@ class AdminUserSeeder extends Seeder
     public function run(): void
     {
         // Admin kullanıcısı oluştur
-        $admin = User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('password'),
-            'role' => 'admin',
-            'email_verified_at' => now(),
-        ]);
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Admin User',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+                'email_verified_at' => now(),
+            ]
+        );
 
         // Örnek kategoriler oluştur
         $categories = [
@@ -36,24 +38,28 @@ class AdminUserSeeder extends Seeder
         ];
 
         foreach ($categories as $index => $categoryData) {
-            Category::create([
-                'name' => $categoryData['name'],
-                'slug' => \Str::slug($categoryData['name']),
-                'description' => $categoryData['description'],
-                'color' => $categoryData['color'],
-                'is_active' => true,
-                'sort_order' => $index,
-            ]);
+            Category::firstOrCreate(
+                ['slug' => \Str::slug($categoryData['name'])],
+                [
+                    'name' => $categoryData['name'],
+                    'description' => $categoryData['description'],
+                    'color' => $categoryData['color'],
+                    'is_active' => true,
+                    'sort_order' => $index,
+                ]
+            );
         }
 
         // Örnek etiketler oluştur
         $tags = ['Yenilik', 'Araştırma', 'Gelişim', 'Trend', 'Analiz', 'Rapor'];
         foreach ($tags as $tagName) {
-            Tag::create([
-                'name' => $tagName,
-                'slug' => \Str::slug($tagName),
-                'color' => '#6B7280',
-            ]);
+            Tag::firstOrCreate(
+                ['slug' => \Str::slug($tagName)],
+                [
+                    'name' => $tagName,
+                    'color' => '#6B7280',
+                ]
+            );
         }
 
         // Örnek haberler oluştur

@@ -130,6 +130,14 @@ class NewsController extends Controller
         $news->load(['category', 'user', 'tags']);
         $news->incrementViews();
 
+        // SEO için breadcrumb verisi
+        $breadcrumbs = [
+            ['name' => 'Ana Səhifə', 'url' => route('home')],
+            ['name' => 'Xəbərlər', 'url' => route('news.index')],
+            ['name' => $news->category->name, 'url' => route('categories.show', $news->category->slug)],
+            ['name' => $news->title, 'url' => null]
+        ];
+
         $relatedNews = News::published()
             ->where('category_id', $news->category_id)
             ->where('id', '!=', $news->id)
@@ -138,6 +146,20 @@ class NewsController extends Controller
             ->take(4)
             ->get();
 
-        return view('frontend.news.show', compact('news', 'relatedNews'));
+        // SEO meta verilerini hazırla
+        $seoData = [
+            'title' => $news->title,
+            'description' => $news->seo_description,
+            'keywords' => $news->seo_keywords,
+            'image' => $news->featured_image_url,
+            'url' => $news->canonical_url,
+            'type' => 'article',
+            'published_time' => $news->published_at->toISOString(),
+            'modified_time' => $news->updated_at->toISOString(),
+            'author' => $news->user->name ?? 'FPortal',
+            'section' => $news->category->name
+        ];
+
+        return view('frontend.news.show', compact('news', 'relatedNews', 'breadcrumbs', 'seoData'));
     }
 }
