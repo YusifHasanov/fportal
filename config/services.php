@@ -37,6 +37,7 @@ return [
 
     'google' => [
         'analytics_id' => env('GOOGLE_ANALYTICS_ID'),
+        'gtm_id' => env('GOOGLE_GTM_ID'),
         'search_console_verification' => env('GOOGLE_SEARCH_CONSOLE_VERIFICATION'),
         'search_console_token' => env('GOOGLE_SEARCH_CONSOLE_TOKEN'),
         'indexing_api_key' => env('GOOGLE_INDEXING_API_KEY'),

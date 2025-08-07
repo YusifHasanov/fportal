@@ -15,6 +15,9 @@
     @if(config('services.google.search_console_verification'))
         <meta name="google-site-verification" content="{{ config('services.google.search_console_verification') }}" />
     @endif
+    
+    <!-- Additional Google Verification Methods -->
+    <meta name="google-site-verification" content="392ZdCWlNWBf-dl8cC_47obI5XWJvs7Nj6FchMNcJ4A" />
 
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="@yield('title', 'FPortal')">
@@ -40,8 +43,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.cdnfonts.com/css/gilroy-bold" rel="stylesheet">
 
-    <!-- Google Analytics 4 -->
-    @if(config('services.google.analytics_id'))
+    <!-- Google Tag Manager -->
+    @if(config('services.google.gtm_id'))
+        <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','{{ config('services.google.gtm_id') }}');</script>
+    @endif
+
+    <!-- Google Analytics 4 (Fallback) -->
+    @if(config('services.google.analytics_id') && !config('services.google.gtm_id'))
         <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google.analytics_id') }}"></script>
         <script>
             window.dataLayer = window.dataLayer || [];
@@ -61,6 +73,11 @@
     @livewireStyles
 </head>
 <body class="font-gilroy antialiased bg-gray-900 text-white">
+    <!-- Google Tag Manager (noscript) -->
+    @if(config('services.google.gtm_id'))
+        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ config('services.google.gtm_id') }}"
+        height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    @endif
     <!-- Sticky Header -->
     <header x-data="{ mobileMenuOpen: false }" x-cloak class="sticky top-0 z-50 bg-gray-900/95 backdrop-blur-sm border-b border-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
